@@ -1,30 +1,60 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
 
 const app = express();
-
+app.use(cors());
 const rootDirectory = "files";
 
-app.get("/items", (req, res) => {
-  const directoryPath =
-    rootDirectory + "/" + req.query.directory || rootDirectory;
-
+app.get("/files", (req, res) => {
+  let directoryPath = rootDirectory;
+  if (req.query.directory !== undefined && req.query.directory.trim() !== "") {
+    console.log("entrato");
+    directoryPath = path.join(rootDirectory, req.query.directory);
+  }
   getItems(directoryPath, (err, items) => {
     if (err) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
+    console.log(items);
     res.json({ items });
   });
 });
 
+app.get("/file", (req, res) => {
+  const fileName = req.query.filename;
+  const dirName = req.query.dir;
+  if (!fileName) {
+    return res.status(400).json({ error: "File name not provided" });
+  }
+  let filePath = rootDirectory;
+  if (dirName) {
+    filePath = path.join(__dirname, rootDirectory + "/" + dirName, fileName);
+  } else {
+    filePath = path.join(__dirname, rootDirectory, fileName);
+  }
+
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    res.send(data);
+  });
+});
 function getItems(directoryPath, callback) {
   fs.readdir(directoryPath, (err, items) => {
     if (err) {
       return callback(err);
     }
 
-    const itemList = [];
+    let directories = [];
+    let files = [];
+    let processedCount = 0;
+
+    if (items.length === 0) {
+      return callback(null, []);
+    }
 
     items.forEach((item) => {
       const itemPath = path.join(directoryPath, item);
@@ -34,26 +64,29 @@ function getItems(directoryPath, callback) {
           return callback(err);
         }
 
-        itemList.push({
-          name: item,
-          type: stats.isDirectory() ? "directory" : "file",
-        });
-
         if (stats.isDirectory()) {
-          getItems(itemPath, (err, subItems) => {
-            if (err) {
-              return callback(err);
-            }
-            itemList.push(...subItems);
-            // Invia la lista degli elementi una volta completato il loop
-            if (itemList.length === items.length) {
-              callback(null, itemList);
-            }
+          directories.push({
+            name: item,
+            type: "directory",
+            size: 0,
           });
         } else {
-          if (itemList.length === items.length) {
-            callback(null, itemList);
-          }
+          files.push({
+            name: item,
+            type: "file",
+            size: stats.size,
+          });
+        }
+
+        processedCount++;
+
+       
+
+        if (processedCount === items.length) {
+          directories = directories.sort();
+          files = files.sort();
+          const sortedItems = directories.concat(files);
+          callback(null, sortedItems);
         }
       });
     });
