@@ -89,7 +89,7 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     errorLogin(res);
   }
-
+  
   const user = await User.findOne({ email: email }).select("+password");
 
   if (!user) {

@@ -1,8 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-const fs = require("fs");
-const http = require("http").Server(app);
 const path = require("path");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -12,8 +10,8 @@ const DB = process.env.DATABASE;
 global.token = "";
 
 app.use(cors());
-const rootDirectory = "files";
 
+mongoose.set("strictQuery", false);
 mongoose
   .connect(DB, {
     useNewUrlParser: true,
@@ -35,13 +33,13 @@ app.use(
   })
 );
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-const authRouter = require('./routers/authRoutes');
-const filesRouter = require('./routers/filesRoutes');
+const authRouter = require("./routers/authRoutes");
+const filesRouter = require("./routers/filesRoutes");
 
-app.use('/api/', authRouter);
-app.use('/api/', filesRouter);
+app.use("/api/", authRouter);
+app.use("/api/", filesRouter);
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {

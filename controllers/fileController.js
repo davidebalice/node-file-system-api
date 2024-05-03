@@ -1,16 +1,14 @@
-const { promisify } = require("util");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 const catchAsync = require("../middlewares/catchAsync");
-const AppError = require("../middlewares/error");
-const Email = require("../middlewares/email");
-const User = require("../models/userModel");
+const fs = require("fs");
+const path = require("path");
+const rootDirectory = "files";
 
 exports.getFiles = catchAsync(async (req, res, next) => {
   let directoryPath = rootDirectory;
   if (req.query.directory !== undefined && req.query.directory.trim() !== "") {
-    console.log("entrato");
     directoryPath = path.join(rootDirectory, req.query.directory);
   }
   getItems(directoryPath, (err, items) => {
@@ -41,6 +39,17 @@ exports.getFile = catchAsync(async (req, res, next) => {
     }
     res.send(data);
   });
+});
+
+exports.checkDirectory = catchAsync(async (req, res, next) => {
+  const dirName = req.query.dir;
+  const directoryPath = path.join(__dirname, '..', rootDirectory + "/" + dirName);
+
+  if (fs.existsSync(directoryPath)) {
+    res.json({ exists: true });
+  } else {
+    res.json({ exists: false });
+  }
 });
 
 function getItems(directoryPath, callback) {
