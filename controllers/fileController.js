@@ -8,14 +8,16 @@ const rootDirectory = "files";
 
 exports.getFiles = catchAsync(async (req, res, next) => {
   let directoryPath = rootDirectory;
-  if (req.query.directory !== undefined && req.query.directory.trim() !== "") {
-    directoryPath = path.join(rootDirectory, req.query.directory);
+  const dirName = req.query.dir;
+  let filePath = rootDirectory;
+
+  if (dirName !== undefined && dirName.trim() !== "") {
+    directoryPath = path.join(rootDirectory, dirName);
   }
   getItems(directoryPath, (err, items) => {
     if (err) {
       return res.status(500).json({ error: "Internal Server Error" });
     }
-    console.log(items);
     res.json({ items });
   });
 });
@@ -43,7 +45,11 @@ exports.getFile = catchAsync(async (req, res, next) => {
 
 exports.checkDirectory = catchAsync(async (req, res, next) => {
   const dirName = req.query.dir;
-  const directoryPath = path.join(__dirname, '..', rootDirectory + "/" + dirName);
+  const directoryPath = path.join(
+    __dirname,
+    "..",
+    rootDirectory + "/" + dirName
+  );
 
   if (fs.existsSync(directoryPath)) {
     res.json({ exists: true });
