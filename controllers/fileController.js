@@ -7,12 +7,13 @@ const path = require("path");
 const rootDirectory = "files";
 
 exports.getFiles = catchAsync(async (req, res, next) => {
+  const parentDir = path.resolve(__dirname, "..");
   let directoryPath = rootDirectory;
   const dirName = req.query.dir;
   let filePath = rootDirectory;
 
   if (dirName !== undefined && dirName.trim() !== "") {
-    directoryPath = path.join(rootDirectory, dirName);
+    directoryPath = path.join(parentDir, rootDirectory, dirName);
   }
   getItems(directoryPath, (err, items) => {
     if (err) {
@@ -23,21 +24,24 @@ exports.getFiles = catchAsync(async (req, res, next) => {
 });
 
 exports.getFile = catchAsync(async (req, res, next) => {
+  const parentDir = path.resolve(__dirname, "..");
   const fileName = req.query.filename;
   const dirName = req.query.dir;
+  console.log(fileName);
+  console.log(dirName);
   if (!fileName) {
     return res.status(400).json({ error: "File name not provided" });
   }
   let filePath = rootDirectory;
   if (dirName) {
-    filePath = path.join(__dirname, rootDirectory + "/" + dirName, fileName);
+    filePath = path.join(parentDir, rootDirectory + "/" + dirName, fileName);
   } else {
-    filePath = path.join(__dirname, rootDirectory, fileName);
+    filePath = path.join(parentDir, rootDirectory, fileName);
   }
 
   fs.readFile(filePath, "utf8", (err, data) => {
     if (err) {
-      return res.status(500).json({ error: "Internal Server Error" });
+      return res.status(404).json({ error: "File not found" });
     }
     res.send(data);
   });
