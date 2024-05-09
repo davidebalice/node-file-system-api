@@ -27,8 +27,6 @@ exports.getFile = catchAsync(async (req, res, next) => {
   const parentDir = path.resolve(__dirname, "..");
   const fileName = req.query.filename;
   const dirName = req.query.dir;
-  console.log(fileName);
-  console.log(dirName);
   if (!fileName) {
     return res.status(400).json({ error: "File name not provided" });
   }
@@ -43,7 +41,7 @@ exports.getFile = catchAsync(async (req, res, next) => {
     if (err) {
       return res.status(404).json({ error: "File not found" });
     }
-    res.send(data);
+    res.send({ title: fileName, content: data });
   });
 });
 
@@ -51,13 +49,19 @@ exports.checkDirectory = catchAsync(async (req, res, next) => {
   const dirName = req.query.dir;
   const directoryPath = path.join(
     __dirname,
-    "..",
-    rootDirectory + "/" + dirName
+    '..',
+    rootDirectory,
+    dirName
   );
 
-  if (fs.existsSync(directoryPath)) {
-    res.json({ exists: true });
-  } else {
+  try {
+    const stats = await fs.promises.stat(directoryPath);
+    if (stats.isDirectory()) {
+      res.json({ exists: true });
+    } else {
+      res.json({ exists: false });
+    }
+  } catch (error) {
     res.json({ exists: false });
   }
 });
