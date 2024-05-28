@@ -47,12 +47,7 @@ exports.getFile = catchAsync(async (req, res, next) => {
 
 exports.checkDirectory = catchAsync(async (req, res, next) => {
   const dirName = req.query.dir;
-  const directoryPath = path.join(
-    __dirname,
-    '..',
-    rootDirectory,
-    dirName
-  );
+  const directoryPath = path.join(__dirname, "..", rootDirectory, dirName);
 
   try {
     const stats = await fs.promises.stat(directoryPath);
@@ -114,3 +109,50 @@ function getItems(directoryPath, callback) {
     });
   });
 }
+
+exports.newFile = catchAsync(async (req, res, next) => {
+  console.log("ergerg");
+  const parentDir = path.resolve(__dirname, "..");
+  const fileName = req.body.filename;
+  const dirName = req.body.dir;
+
+  if (!fileName) {
+    return res.status(400).json({ error: "File name not provided" });
+  }
+  let filePath = rootDirectory;
+  if (dirName) {
+    filePath = path.join(parentDir, rootDirectory + "/" + dirName, fileName);
+  } else {
+    filePath = path.join(parentDir, rootDirectory, fileName);
+  }
+
+
+  fs.writeFile(filePath, "", (err, data) => {
+    if (err) {
+      return res.status(404).json({ error: "File not found" });
+    }
+    res.send({ title: fileName, content: data });
+  });
+});
+
+exports.saveFile = catchAsync(async (req, res, next) => {
+  const parentDir = path.resolve(__dirname, "..");
+  const fileName = req.query.filename;
+  const dirName = req.query.dir;
+  if (!fileName) {
+    return res.status(400).json({ error: "File name not provided" });
+  }
+  let filePath = rootDirectory;
+  if (dirName) {
+    filePath = path.join(parentDir, rootDirectory + "/" + dirName, fileName);
+  } else {
+    filePath = path.join(parentDir, rootDirectory, fileName);
+  }
+
+  fs.writeFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(404).json({ error: "File not found" });
+    }
+    res.send({ title: fileName, content: data });
+  });
+});
