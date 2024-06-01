@@ -4,11 +4,19 @@ const authController = require("../controllers/authController");
 const fileController = require("../controllers/fileController");
 const bodyParser = require("body-parser");
 const urlencodeParser = bodyParser.urlencoded({ extended: false });
+const demoMode = require("../middlewares/demo_mode");
 
 router.route("/files").get(authController.protect, fileController.getFiles);
 router.route("/file").get(authController.protect, fileController.getFile);
-router.route("/newfile").post(authController.protect, fileController.newFile);
-router.route("/editfile").post(authController.protect, fileController.saveFile);
+router
+  .route("/new")
+  .post(demoMode, authController.protect, fileController.newFile);
+router
+  .route("/edit")
+  .post(demoMode, authController.protect, fileController.saveFile);
+router
+  .route("/delete")
+  .post(demoMode, authController.protect, fileController.deleteFile);
 router
   .route("/checkdir")
   .get(authController.protect, fileController.checkDirectory);
