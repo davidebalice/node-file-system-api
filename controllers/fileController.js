@@ -148,8 +148,9 @@ exports.saveFile = catchAsync(async (req, res, next) => {
     });
   } else {
     const parentDir = path.resolve(__dirname, "..");
-    const fileName = req.query.filename;
-    const dirName = req.query.dir;
+    const fileName = req.body.filename;
+    const dirName = req.body.dir;
+    const content = req.body.content;
     if (!fileName) {
       return res.status(400).json({ error: "File name not provided" });
     }
@@ -160,12 +161,13 @@ exports.saveFile = catchAsync(async (req, res, next) => {
       filePath = path.join(parentDir, rootDirectory, fileName);
     }
 
-    fs.writeFile(filePath, "utf8", (err, data) => {
+    fs.writeFile(filePath, content, (err, data) => {
       if (err) {
         return res.status(404).json({ error: "File not found" });
       }
       res.send({ title: fileName, content: data });
     });
+
   }
 });
 
@@ -177,25 +179,59 @@ exports.deleteFile = catchAsync(async (req, res, next) => {
     });
   } else {
     const parentDir = path.resolve(__dirname, "..");
-    const fileName = req.query.filename;
-    const dirName = req.query.dir;
+    const fileName = req.body.filename;
+    const dirName = req.body.dir;
+
+    console.log(dirName);
+    console.log(fileName);
 
     if (!fileName) {
       return res.status(400).json({ error: "File name not provided" });
     }
 
-    let filePath = rootDirectory;
+    let filePath = path.join(parentDir, rootDirectory, fileName);
     if (dirName) {
-      filePath = path.join(parentDir, rootDirectory + "/" + dirName, fileName);
-    } else {
-      filePath = path.join(parentDir, rootDirectory, fileName);
+      filePath = path.join(parentDir, rootDirectory, dirName, fileName);
     }
 
     fs.unlink(filePath, (err) => {
       if (err) {
         return res.status(404).json({ error: "File not found" });
       }
-      res.json({ message: "File deleted successfully" });
+      res.status(200).json({ message: "File deleted successfully" });
+    });
+  }
+});
+
+exports.renameFile = catchAsync(async (req, res, next) => {
+  if (global.demo) {
+    res.status(200).json({
+      title: "Demo mode",
+      status: "demo",
+    });
+  } else {
+    const parentDir = path.resolve(__dirname, "..");
+    const oldFileName = req.body.oldFilename;
+    const newFileName = req.body.newFilename;
+    const dirName = req.body.dir;
+
+    if (!oldFileName || !newFileName) {
+      return res.status(400).json({ error: "File names not provided" });
+    }
+
+    let oldFilePath = path.join(parentDir, rootDirectory, oldFileName);
+    let newFilePath = path.join(parentDir, rootDirectory, newFileName);
+
+    if (dirName) {
+      oldFilePath = path.join(parentDir, rootDirectory, dirName, oldFileName);
+      newFilePath = path.join(parentDir, rootDirectory, dirName, newFileName);
+    }
+
+    fs.rename(oldFilePath, newFilePath, (err) => {
+      if (err) {
+        return res.status(404).json({ error: "File not found or renaming failed" });
+      }
+      res.status(200).json({ message: "File renamed successfully" });
     });
   }
 });

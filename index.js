@@ -9,7 +9,11 @@ const DB = process.env.DATABASE;
 
 global.token = "";
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 
 mongoose.set("strictQuery", false);
 mongoose

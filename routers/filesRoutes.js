@@ -18,6 +18,9 @@ router
   .route("/delete")
   .post(demoMode, authController.protect, fileController.deleteFile);
 router
+  .route("/rename")
+  .post(demoMode, authController.protect, fileController.renameFile);
+router
   .route("/checkdir")
   .get(authController.protect, fileController.checkDirectory);
 
