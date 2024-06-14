@@ -211,8 +211,8 @@ exports.renameFile = catchAsync(async (req, res, next) => {
     });
   } else {
     const parentDir = path.resolve(__dirname, "..");
-    const oldFileName = req.body.oldFilename;
-    const newFileName = req.body.newFilename;
+    const oldFileName = req.body.oldFileName;
+    const newFileName = req.body.newFileName;
     const dirName = req.body.dir;
 
     if (!oldFileName || !newFileName) {
