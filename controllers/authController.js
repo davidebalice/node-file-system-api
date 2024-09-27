@@ -69,15 +69,13 @@ async function getTokenDb(userId) {
   }
 }
 
-
-
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     errorLogin(res);
   }
-  
+
   const user = await User.findOne({ email: email }).select("+password");
 
   if (!user) {
@@ -191,7 +189,6 @@ exports.restrictTo =
     next();
   };
 
-
 exports.getUserByToken = catchAsync(async (req, res, next) => {
   if (req.cookies.jwt || res.locals.token) {
     try {
@@ -200,6 +197,13 @@ exports.getUserByToken = catchAsync(async (req, res, next) => {
         token = req.cookies.jwt;
       } else {
         token = res.locals.token;
+      }
+
+      if (!token) {
+        return res.status(400).json({
+          status: "error",
+          message: "Token not found",
+        });
       }
 
       const decoded = await promisify(jwt.verify)(

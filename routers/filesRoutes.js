@@ -9,6 +9,9 @@ const demoMode = require("../middlewares/demo_mode");
 router.route("/files").get(authController.protect, fileController.getFiles);
 router.route("/file").get(authController.protect, fileController.getFile);
 router
+  .route("/photo/:filename")
+  .get(authController.protect, fileController.getPhoto);
+router
   .route("/new")
   .post(demoMode, authController.protect, fileController.newFile);
 router

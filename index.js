@@ -6,12 +6,24 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
 const DB = process.env.DATABASE;
+const cookieParser = require("cookie-parser");
 
 global.token = "";
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: function (origin, callback) {
+      if (
+        !origin ||
+        /(^|\.)davidebalice\.dev$/.test(origin) ||
+        /^http:\/\/localhost(:\d{1,5})?$/.test(origin)
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    optionsSuccessStatus: 200,
   })
 );
 
@@ -30,7 +42,7 @@ mongoose
 var session = require("express-session");
 var bodyParser = require("body-parser");
 
-//app.use(cookieParser());
+app.use(cookieParser());
 app.use(
   bodyParser.urlencoded({
     extended: true,

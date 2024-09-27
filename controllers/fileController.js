@@ -167,7 +167,6 @@ exports.saveFile = catchAsync(async (req, res, next) => {
       }
       res.send({ title: fileName, content: data });
     });
-
   }
 });
 
@@ -229,9 +228,17 @@ exports.renameFile = catchAsync(async (req, res, next) => {
 
     fs.rename(oldFilePath, newFilePath, (err) => {
       if (err) {
-        return res.status(404).json({ error: "File not found or renaming failed" });
+        return res
+          .status(404)
+          .json({ error: "File not found or renaming failed" });
       }
       res.status(200).json({ message: "File renamed successfully" });
     });
   }
+});
+
+exports.getPhoto = catchAsync(async (req, res, next) => {
+  const filename = req.params.filename;
+  const filePath = path.join(process.env.FILE_PATH, rootDirectory, filename);
+  res.sendFile(filePath);
 });
