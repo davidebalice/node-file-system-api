@@ -19,7 +19,7 @@ https://github.com/davidebalice/react-terminal-emulator
 
 ## Os interface repository:
 
-https://github.com/davidebalice/node-file-system-api
+github.com/davidebalice/react-os-interface
 
 ## Backend repository:
 
